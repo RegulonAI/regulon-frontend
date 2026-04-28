@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+/* No Tailwind v4, o @import "tailwindcss" já inclui as camadas base, 
+  components e utilities automaticamente. 
+*/
+
+:root {
+  --foreground-rgb: 24, 24, 27; /* zinc-900 */
+  --background-rgb: 255, 255, 255;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Customização do Scrollbar para o Regulon AI.
+  Para evitar o erro de "unknown utility class" no build do Next 16, 
+  utilizamos propriedades CSS padrão.
+*/
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  /* Substituímos o @apply por valores hexadecimais do zinc-200/300 */
+  background-color: #e4e4e7; /* zinc-200 */
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #d4d4d8; /* zinc-300 */
+}
