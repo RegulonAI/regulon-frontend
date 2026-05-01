@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
  * Endpoint seguro para consultas jurídicas com IA
  * - API Key (GEMINI_API_KEY) permanece oculta no servidor
  * - Valida entrada e trata erros gracefully
+ * - P2: Retorna metadata com confidence e agentsUsed
  */
 export async function POST(request: NextRequest) {
   try {
@@ -18,8 +19,8 @@ export async function POST(request: NextRequest) {
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey || apiKey === 'MY_GEMINI_API_KEY' || apiKey === '') {
-      console.error('[CHAT_API] GEMINI_API_KEY não configurada');
+    if (!apiKey || apiKey === '') {
+      console.error('[CHAT_API] API key não configurada');
       return NextResponse.json(
         { 
           error: 'Serviço de IA temporariamente indisponível. Por favor, configure GEMINI_API_KEY no servidor.' 
@@ -28,13 +29,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Simulando resposta de IA até backend do Samuel estar pronto
-    // TODO: Integrar com API real do Gemini quando disponível
-    const simulatedReply = await generateLegalInsight(message);
+    // Simulando resposta de IA até backend estar pronto
+    // Future: Integrar com API real de IA quando disponível
+    const { reply, confidence, agentsUsed } = await generateLegalInsight(message);
 
-    return NextResponse.json({ reply: simulatedReply }, { status: 200 });
+    // P2: Retornar metadata de confiança
+    return NextResponse.json(
+      { 
+        reply,
+        confidence,
+        agentsUsed
+      }, 
+      { status: 200 }
+    );
   } catch (error) {
-    console.error('[CHAT_API] Erro interno:', error);
+    console.error('[CHAT_API] Request failed');
     return NextResponse.json(
       { error: 'Erro ao processar consulta jurídica. Tente novamente.' },
       { status: 500 }
@@ -43,27 +52,60 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Gera resposta simulada de assistente jurídico
- * Será substituído por integração real com Gemini/Claude
+ * Gera resposta simulada de assistente jurídico com metadata P2
+ * Será substituído por integração real com backend LLM quando disponível
  */
-async function generateLegalInsight(userMessage: string): Promise<string> {
+async function generateLegalInsight(
+  userMessage: string
+): Promise<{ reply: string; confidence: number; agentsUsed: { id: string; name: string; displayName: string }[] }> {
   // Simular latência de rede
   await new Promise(resolve => setTimeout(resolve, 800));
 
-  const insights: Record<string, string> = {
-    'lgpd': 'A LGPD exige consentimento prévio e explícito do titular de dados. Recomendações: 1) Remova checkboxes pré-marcadas, 2) Atualize Política de Privacidade, 3) Implemente direito ao esquecimento.',
-    'gdpr': 'GDPR se aplica a dados de residentes da UE. Recomendações: 1) Designar Data Protection Officer, 2) Realizar DPIA, 3) Estabelecer SLA de resposta a direitos.',
-    'compliance': 'Conformidade regulatória requer mapeamento contínuo. Recomendações: 1) Auditar processos mensalmente, 2) Documentar decisões legais, 3) Treinar equipe.',
-    'risco': 'Análise de risco identifica vulnerabilidades legais. Recomendações: 1) Classificar por impacto, 2) Priorizar mitigação, 3) Monitorar legislação.',
+  const insights: Record<string, { reply: string; confidence: number }> = {
+    'lgpd': {
+      reply: 'A LGPD exige consentimento prévio e explícito do titular de dados. Recomendações: 1) Remova checkboxes pré-marcadas, 2) Atualize Política de Privacidade, 3) Implemente direito ao esquecimento.',
+      confidence: 0.95
+    },
+    'gdpr': {
+      reply: 'GDPR se aplica a dados de residentes da UE. Recomendações: 1) Designar Data Protection Officer, 2) Realizar DPIA, 3) Estabelecer SLA de resposta a direitos.',
+      confidence: 0.92
+    },
+    'compliance': {
+      reply: 'Conformidade regulatória requer mapeamento contínuo. Recomendações: 1) Auditar processos mensalmente, 2) Documentar decisões legais, 3) Treinar equipe.',
+      confidence: 0.88
+    },
+    'risco': {
+      reply: 'Análise de risco identifica vulnerabilidades legais. Recomendações: 1) Classificar por impacto, 2) Priorizar mitigação, 3) Monitorar legislação.',
+      confidence: 0.85
+    },
   };
 
   const lowerMessage = userMessage.toLowerCase();
+  let selectedInsight = null;
+  let selectedConfidence = 0.7;
+
   for (const [key, insight] of Object.entries(insights)) {
     if (lowerMessage.includes(key)) {
-      return insight;
+      selectedInsight = insight.reply;
+      selectedConfidence = insight.confidence;
+      break;
     }
   }
 
-  return 'Consulta registrada. Para análise jurídica detalhada, o cérebro RAG do Samuel processará seu documento em breve. Você pode: 1) Fazer upload de um PDF, 2) Formular nova pergunta, 3) Consultar checklist.';
+  const reply = selectedInsight || 
+    'Consulta registrada. Para análise jurídica detalhada, o cérebro RAG do Samuel processará seu documento em breve. Você pode: 1) Fazer upload de um PDF, 2) Formular nova pergunta, 3) Consultar checklist.';
+
+  // P2: Simular agentes que processaram a mensagem
+  const agentsUsed = [
+    { id: 'agent-1', name: 'classificador', displayName: 'Classificador' },
+    { id: 'agent-2', name: 'matching', displayName: 'Matching' },
+    { id: 'agent-3', name: 'interpretador', displayName: 'Interpretador' }
+  ];
+
+  return { 
+    reply, 
+    confidence: selectedInsight ? selectedConfidence : 0.65,
+    agentsUsed
+  };
 }
 
