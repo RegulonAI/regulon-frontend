@@ -64,7 +64,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
 
       <div className="p-4 border-t border-zinc-100 italic text-[10px] text-zinc-400 flex items-center gap-2">
         <Terminal className="w-3 h-3" />
-        Versão MVP 1.0.2 - William
+        Versão MVP 1.0.2
       </div>
     </aside>
   );

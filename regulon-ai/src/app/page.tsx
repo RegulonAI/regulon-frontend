@@ -144,7 +144,7 @@ async function simulateAgentProgress(
   }
 
   // Mock: Fetch data from /api/analyze
-  // Em produção, será substituído pela integração com WebSocket/polling do backend
+  // Em produção, será substituído por integração com WebSocket/polling do backend
   try {
     const res = await fetch('/api/analyze', { method: 'POST' });
     const data = await res.json();
@@ -161,7 +161,7 @@ async function simulateAgentProgress(
       checklist: data.checklist || [],
     };
   } catch (error) {
-    console.error('[PAGE] Error fetching analysis results:', error);
+    console.error('[PAGE] Analysis request failed');
 
     // Fallback to empty results on error
     setAnalysisState(prev => ({

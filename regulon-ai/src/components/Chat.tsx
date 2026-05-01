@@ -44,8 +44,8 @@ export function Chat({ messages, setMessages }: ChatProps) {
         throw new Error(data.error);
       }
     } catch (error: any) {
-      console.error("Chat Error:", error);
-      setMessages(prev => [...prev, { role: 'assistant', content: error.message || "Desculpe, tivemos um problema de rede ou erro na IA. Tente novamente." }]);
+      console.error("[CHAT] Request failed");
+      setMessages(prev => [...prev, { role: 'assistant', content: "Desculpe, tivemos um problema ao processar sua consulta. Tente novamente." }]);
     } finally {
       setIsLoading(false);
     }
