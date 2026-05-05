@@ -1,6 +1,6 @@
 'use client';
 
-import { ChecklistItem } from '@/types/types';
+import type { ChecklistItem } from '@/types/compliance';
 import { CheckSquare } from 'lucide-react';
 
 interface ChecklistProps {
@@ -49,4 +49,3 @@ export function Checklist({ checklist, setChecklist }: ChecklistProps) {
     </div>
   );
 }
-

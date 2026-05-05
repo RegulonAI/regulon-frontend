@@ -1,6 +1,6 @@
 'use client';
 
-import { RegulationImpact } from '@/types/types';
+import type { RegulationImpact } from '@/types/compliance';
 import { FileText, ArrowRight, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -111,4 +111,3 @@ export function Dashboard({ analysisActive, impacts, handleFileUpload }: Dashboa
     </div>
   );
 }
-
