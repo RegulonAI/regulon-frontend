@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import type { RegulationImpact, ChecklistItem } from '@/types/types';
+import { NextResponse } from 'next/server';
+import type { RegulationImpact, ChecklistItem } from '@/types/compliance';
 
 /**
  * POST /api/analyze
@@ -21,8 +21,10 @@ import type { RegulationImpact, ChecklistItem } from '@/types/types';
  * @returns {NextResponse} JSON com { impacts, checklist, metadata }
  * @throws {500} Se houver erro ao processar documento
  */
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export async function POST(): Promise<NextResponse> {
   try {
+    const retrievedAt = new Date().toISOString();
+
     // Simular processamento/parsing de PDF com delay realista
     // Future: Substituir por chamada real ao backend quando disponível
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -36,12 +38,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         relevance: 'Tratamento de dados de clientes no checkout',
         summary: 'A nova interpretação exige que o checkbox não venha pré-marcado.',
         metadata: {
-          source: 'postgresql',
-          confidence: 0.98,
-          sourceId: 'reg-2024-lgpd-018'
+          source: 'sql',
+          confidenceScore: 98,
+          retrievedAt,
         },
         source: {
-          regulation: 'Artigo 18 da Lei 13.709/2018 (LGPD)',
+          regulationName: 'LGPD',
           jurisdiction: 'BR',
           effectiveDate: '2020-08-28'
         }
@@ -53,12 +55,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         relevance: 'Relatórios de sustentabilidade financeira',
         summary: 'Obrigatoriedade de divulgação de riscos climáticos no balanço anual.',
         metadata: {
-          source: 'postgresql',
-          confidence: 0.92,
-          sourceId: 'reg-2024-cvm-193'
+          source: 'sql',
+          confidenceScore: 92,
+          retrievedAt,
         },
         source: {
-          regulation: 'Resolução CVM nº 193/2021',
+          regulationName: 'Resolução CVM nº 193',
           jurisdiction: 'BR',
           effectiveDate: '2021-12-27'
         }
@@ -71,11 +73,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         summary: 'Ajuste necessário nos prazos de estorno automático após devolução.',
         metadata: {
           source: 'vector_db',
-          confidence: 0.75,
-          vectorSimilarity: 0.82
+          confidenceScore: 75,
+          similarity: 82,
+          retrievedAt,
         },
         source: {
-          regulation: 'Artigo 49 da Lei 8.078/1990 (CDC)',
+          regulationName: 'Código de Defesa do Consumidor (CDC)',
           jurisdiction: 'BR',
           effectiveDate: '1990-09-11'
         }
@@ -88,12 +91,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         summary: 'Conformidade obrigatória: possibilidade de multa até R$ 50 milhões por infração.',
         metadata: {
           source: 'hybrid',
-          confidence: 0.96,
-          vectorSimilarity: 0.88,
-          sourceId: 'reg-2024-lgpd-048-052'
+          confidenceScore: 96,
+          similarity: 88,
+          retrievedAt,
         },
         source: {
-          regulation: 'Artigos 48-52 da Lei 13.709/2018 (LGPD)',
+          regulationName: 'LGPD',
           jurisdiction: 'BR',
           effectiveDate: '2020-08-28'
         }
@@ -162,7 +165,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
       { status: 200 }
     );
-  } catch (error) {
+  } catch {
     console.error('[ANALYZE_API] Processing failed');
     
     // Formato de erro uniforme: consistente com /api/chat/route.ts

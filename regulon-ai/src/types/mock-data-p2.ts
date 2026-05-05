@@ -1,7 +1,7 @@
 /**
  * Mock Data Examples for P2 Hybrid Architecture
  * 
- * Demonstrates how to use the new DataSourceMetadata, JuridicalSource,
+ * Demonstrates how to use the new DataSourceMetadata, RegulationSource,
  * and extended interfaces with real-world scenarios.
  * 
  * Use these examples to test Dashboard, Chat, and Checklist components.
@@ -11,60 +11,61 @@ import {
   RegulationImpact,
   ChecklistItem,
   ChatMessage,
-  AgentStatus,
   DataSourceMetadata,
-  JuridicalSource,
-} from '@/types/types';
+  RegulationSource,
+} from '@/types/compliance';
 
 // ==================== MOCK: Data Source Metadata ====================
 
 export const mockMetadataHighConfidenceSql: DataSourceMetadata = {
-  source: 'postgresql',
-  confidence: 0.98,
-  sourceId: 'reg-2024-lgpd-052',
+  source: 'sql',
+  confidenceScore: 98,
+  retrievedAt: '2026-04-30T10:00:00Z',
 };
 
 export const mockMetadataModerateConfidenceVector: DataSourceMetadata = {
   source: 'vector_db',
-  confidence: 0.72,
-  vectorSimilarity: 0.85,
+  confidenceScore: 72,
+  similarity: 85,
+  retrievedAt: '2026-04-30T10:00:00Z',
 };
 
 export const mockMetadataHybrid: DataSourceMetadata = {
   source: 'hybrid',
-  confidence: 0.95,
-  vectorSimilarity: 0.92,
-  sourceId: 'reg-2024-lgpd-052',
+  confidenceScore: 95,
+  similarity: 92,
+  retrievedAt: '2026-04-30T10:00:00Z',
 };
 
 export const mockMetadataLowConfidence: DataSourceMetadata = {
   source: 'vector_db',
-  confidence: 0.45,
-  vectorSimilarity: 0.42,
+  confidenceScore: 45,
+  similarity: 42,
+  retrievedAt: '2026-04-30T10:00:00Z',
 };
 
 // ==================== MOCK: Juridical Source ====================
 
-export const mockJuridicalSourceLgpd: JuridicalSource = {
-  regulation: 'Artigo 52 da Lei 13.709/2018 (Lei Geral de Proteção de Dados)',
+export const mockJuridicalSourceLgpd: RegulationSource = {
+  regulationName: 'LGPD',
   jurisdiction: 'BR',
   effectiveDate: '2020-08-28',
 };
 
-export const mockJuridicalSourceGdpr: JuridicalSource = {
-  regulation: 'Regulamento (UE) 2016/679 - GDPR, Artigo 17 (Direito ao Esquecimento)',
+export const mockJuridicalSourceGdpr: RegulationSource = {
+  regulationName: 'GDPR',
   jurisdiction: 'UE',
   effectiveDate: '2018-05-25',
 };
 
-export const mockJuridicalSourceCalifornia: JuridicalSource = {
-  regulation: 'California Consumer Privacy Act (CCPA), Seção 1798.100',
+export const mockJuridicalSourceCalifornia: RegulationSource = {
+  regulationName: 'CCPA',
   jurisdiction: 'US',
   effectiveDate: '2020-01-01',
 };
 
-export const mockJuridicalSourceInternational: JuridicalSource = {
-  regulation: 'ISO 27001:2022 - Information Security Management System',
+export const mockJuridicalSourceInternational: RegulationSource = {
+  regulationName: 'ISO 27001',
   jurisdiction: 'INTL',
   effectiveDate: '2022-10-14',
 };
@@ -102,7 +103,7 @@ export const mockImpactVectorSearch: RegulationImpact = {
 
   metadata: mockMetadataModerateConfidenceVector,
   source: {
-    regulation: 'Artigo 33 da Lei 13.709/2018 (LGPD) - Transferência Internacional',
+    regulationName: 'LGPD',
     jurisdiction: 'BR',
     effectiveDate: '2020-08-28',
   },
@@ -138,7 +139,7 @@ export const mockImpactLowConfidence: RegulationImpact = {
 
   metadata: mockMetadataLowConfidence,
   source: {
-    regulation: 'Artigo 13 da Lei 13.709/2018 (LGPD) - Dados Sensíveis',
+    regulationName: 'LGPD',
     jurisdiction: 'BR',
     effectiveDate: '2020-08-28',
   },
@@ -199,7 +200,9 @@ export const mockChatMessages: ChatMessage[] = [
     role: 'user',
     content: 'Somos uma empresa com operações no Brasil e Europa. Como ficamos com LGPD?',
     timestamp: '2026-04-30T10:15:00Z',
-    confidence: 1.0, // User input always 100% confident
+    metadata: {
+      confidenceScore: 100,
+    },
   },
 
   {
@@ -207,40 +210,35 @@ export const mockChatMessages: ChatMessage[] = [
     content:
       'Sim, sua empresa está sujeita à LGPD (Lei Geral de Proteção de Dados do Brasil). Como você processa dados pessoais de residentes brasileiros, você deve cumprir todos os 11 artigos principais. Aqui estão as ações críticas:\n\n1. **Art. 18** - Direito de Acesso: Usuários podem solicitar seus dados\n2. **Art. 52** - Sanções: Multas até R$ 50 milhões por violação\n3. **Art. 33** - Transferência Internacional: Se enviar dados para o exterior\n\nRecomendação: Implementar API de acesso em 6 semanas.',
     timestamp: '2026-04-30T10:16:30Z',
-    confidence: 0.93, // High confidence - data from PostgreSQL + Vector confirmation
-    agentsUsed: [
+    metadata: {
+      confidenceScore: 93,
+      agentsUsed: [
       {
         id: 'agent-1',
         name: 'classificador',
         displayName: 'Classificador',
-        status: 'concluído',
-        progress: 100,
-        message: 'Classificou como: LGPD Compliance',
       },
       {
         id: 'agent-2',
         name: 'matching',
         displayName: 'Matching',
-        status: 'concluído',
-        progress: 100,
-        message: 'Encontrou 3 normas relevantes',
       },
       {
         id: 'agent-3',
         name: 'interpretador',
         displayName: 'Interpretador',
-        status: 'concluído',
-        progress: 100,
-        message: 'Gerou 5 impactos críticos',
       },
-    ],
+      ],
+    },
   },
 
   {
     role: 'user',
     content: 'E quanto a dados biométricos? Temos reconhecimento facial em nossas lojas.',
     timestamp: '2026-04-30T10:18:15Z',
-    confidence: 1.0,
+    metadata: {
+      confidenceScore: 100,
+    },
   },
 
   {
@@ -248,25 +246,21 @@ export const mockChatMessages: ChatMessage[] = [
     content:
       '⚠️ **Confiança Moderada (72%)** - Esta análise é baseada em busca semântica.\n\nSeu uso de reconhecimento facial com dados biométricos toca em:  \n\n- **LGPD Art. 13** - Tratamento de dados sensíveis (requer consentimento explícito)  \n- Possível aplicação de **GDPR Art. 9** se você tiver usuários europeus  \n- Pode requerer **avaliação de impacto** (DPIA) conforme regulações  \n\n**Ação recomendada:** Revisar política de privacidade e obter parecer jurídico especializado.',
     timestamp: '2026-04-30T10:19:45Z',
-    confidence: 0.72, // Moderate confidence - vector similarity 0.85
-    agentsUsed: [
+    metadata: {
+      confidenceScore: 72,
+      agentsUsed: [
       {
         id: 'agent-2',
         name: 'matching',
         displayName: 'Matching',
-        status: 'concluído',
-        progress: 100,
-        message: 'Busca semântica com 0.85 score',
       },
       {
         id: 'agent-3',
         name: 'interpretador',
         displayName: 'Interpretador',
-        status: 'concluído',
-        progress: 100,
-        message: 'Interpretação com confiança moderada',
       },
-    ],
+      ],
+    },
   },
 ];
 
@@ -282,23 +276,23 @@ export const mockCompleteScenario = {
 
 /**
  * Get badge color based on confidence score
- * @param confidence - Score 0-1
+ * @param confidence - Score 0-100
  * @returns Tailwind color class
  */
 export function getConfidenceBadgeColor(confidence: number): string {
-  if (confidence >= 0.8) return 'bg-green-50 text-green-700 border-green-200';
-  if (confidence >= 0.5) return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+  if (confidence >= 80) return 'bg-green-50 text-green-700 border-green-200';
+  if (confidence >= 50) return 'bg-yellow-50 text-yellow-700 border-yellow-200';
   return 'bg-red-50 text-red-700 border-red-200';
 }
 
 /**
  * Get badge emoji based on confidence score
- * @param confidence - Score 0-1
+ * @param confidence - Score 0-100
  * @returns Emoji string
  */
 export function getConfidenceEmoji(confidence: number): string {
-  if (confidence >= 0.8) return '🟢';
-  if (confidence >= 0.5) return '🟡';
+  if (confidence >= 80) return '🟢';
+  if (confidence >= 50) return '🟡';
   return '🔴';
 }
 

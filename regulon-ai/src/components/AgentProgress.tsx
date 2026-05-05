@@ -1,6 +1,6 @@
 'use client';
 
-import { AgentStatus } from '@/types/types';
+import type { AgentStatus } from '@/types/compliance';
 import { Loader2, CheckCircle, AlertCircle, Circle } from 'lucide-react';
 import { motion } from 'framer-motion';
 

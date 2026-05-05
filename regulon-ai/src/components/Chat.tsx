@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { ChatMessage } from '@/types/types';
+import type { ChatMessage } from '@/types/compliance';
 import { MessageSquare, ChevronRight } from 'lucide-react';
 
 interface ChatProps {
@@ -25,7 +25,14 @@ export function Chat({ messages, setMessages }: ChatProps) {
 
     const userMessage = inputValue;
     setInputValue('');
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setMessages(prev => [
+      ...prev,
+      {
+        role: 'user',
+        content: userMessage,
+        timestamp: new Date().toISOString(),
+      },
+    ]);
     setIsLoading(true);
 
     try {
@@ -39,13 +46,31 @@ export function Chat({ messages, setMessages }: ChatProps) {
       const data = await response.json();
 
       if (response.ok) {
-        setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+        setMessages(prev => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: data.reply,
+            timestamp: new Date().toISOString(),
+            metadata: {
+              confidenceScore: typeof data.confidence === 'number' ? data.confidence : undefined,
+              agentsUsed: Array.isArray(data.agentsUsed) ? data.agentsUsed : undefined,
+            },
+          },
+        ]);
       } else {
         throw new Error(data.error);
       }
-    } catch (error: any) {
+    } catch {
       console.error("[CHAT] Request failed");
-      setMessages(prev => [...prev, { role: 'assistant', content: "Desculpe, tivemos um problema ao processar sua consulta. Tente novamente." }]);
+      setMessages(prev => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: "Desculpe, tivemos um problema ao processar sua consulta. Tente novamente.",
+          timestamp: new Date().toISOString(),
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -110,4 +135,3 @@ export function Chat({ messages, setMessages }: ChatProps) {
     </div>
   );
 }
-

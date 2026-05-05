@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type { ChatProcessingAgent } from '@/types/compliance';
 
 /**
  * POST /api/chat
@@ -42,7 +43,7 @@ export async function POST(request: NextRequest) {
       }, 
       { status: 200 }
     );
-  } catch (error) {
+  } catch {
     console.error('[CHAT_API] Request failed');
     return NextResponse.json(
       { error: 'Erro ao processar consulta jurídica. Tente novamente.' },
@@ -57,32 +58,32 @@ export async function POST(request: NextRequest) {
  */
 async function generateLegalInsight(
   userMessage: string
-): Promise<{ reply: string; confidence: number; agentsUsed: { id: string; name: string; displayName: string }[] }> {
+): Promise<{ reply: string; confidence: number; agentsUsed: ChatProcessingAgent[] }> {
   // Simular latência de rede
   await new Promise(resolve => setTimeout(resolve, 800));
 
   const insights: Record<string, { reply: string; confidence: number }> = {
     'lgpd': {
       reply: 'A LGPD exige consentimento prévio e explícito do titular de dados. Recomendações: 1) Remova checkboxes pré-marcadas, 2) Atualize Política de Privacidade, 3) Implemente direito ao esquecimento.',
-      confidence: 0.95
+      confidence: 95
     },
     'gdpr': {
       reply: 'GDPR se aplica a dados de residentes da UE. Recomendações: 1) Designar Data Protection Officer, 2) Realizar DPIA, 3) Estabelecer SLA de resposta a direitos.',
-      confidence: 0.92
+      confidence: 92
     },
     'compliance': {
       reply: 'Conformidade regulatória requer mapeamento contínuo. Recomendações: 1) Auditar processos mensalmente, 2) Documentar decisões legais, 3) Treinar equipe.',
-      confidence: 0.88
+      confidence: 88
     },
     'risco': {
       reply: 'Análise de risco identifica vulnerabilidades legais. Recomendações: 1) Classificar por impacto, 2) Priorizar mitigação, 3) Monitorar legislação.',
-      confidence: 0.85
+      confidence: 85
     },
   };
 
   const lowerMessage = userMessage.toLowerCase();
   let selectedInsight = null;
-  let selectedConfidence = 0.7;
+  let selectedConfidence = 70;
 
   for (const [key, insight] of Object.entries(insights)) {
     if (lowerMessage.includes(key)) {
@@ -104,8 +105,7 @@ async function generateLegalInsight(
 
   return { 
     reply, 
-    confidence: selectedInsight ? selectedConfidence : 0.65,
+    confidence: selectedInsight ? selectedConfidence : 65,
     agentsUsed
   };
 }
-

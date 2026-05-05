@@ -15,7 +15,7 @@ import {
   ChatMessage,
   AgentStatus,
   AnalysisState,
-} from '@/types/types';
+} from '@/types/compliance';
 import { Sidebar } from '@/components/Sidebar';
 import { Dashboard } from '@/components/Dashboard';
 import { Chat } from '@/components/Chat';
