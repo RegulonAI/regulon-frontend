@@ -2,7 +2,7 @@
 
 import type { RegulationImpact } from '@/types/compliance';
 import { FileText, ArrowRight, AlertTriangle } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Badge } from '@/components/ui/badge';
 
 interface DashboardProps {
   analysisActive: boolean;
@@ -11,17 +11,7 @@ interface DashboardProps {
 }
 
 const ImpactBadge = ({ level }: { level: RegulationImpact['impactLevel'] }) => {
-  const styles = {
-    CRITICAL: 'bg-red-50 text-red-700 border-red-200',
-    HIGH: 'bg-orange-50 text-orange-700 border-orange-200',
-    MEDIUM: 'bg-yellow-50 text-yellow-700 border-yellow-200',
-    LOW: 'bg-green-50 text-green-700 border-green-200',
-  };
-  return (
-    <span className={`px-2 py-0.5 text-[10px] font-bold border rounded-full ${styles[level]}`}>
-      {level}
-    </span>
-  );
+  return <Badge impactLevel={level}>{level}</Badge>;
 };
 
 export function Dashboard({ analysisActive, impacts, handleFileUpload }: DashboardProps) {

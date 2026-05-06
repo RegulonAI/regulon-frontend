@@ -3,6 +3,9 @@
 :root {
   --background: #fafafa; /* zinc-50 */
   --foreground: #18181b; /* zinc-900 */
+  --border: #e4e4e7; /* zinc-200 */
+  --card: #ffffff;
+  --card-muted: rgb(244 244 245 / 0.5); /* zinc-100/50 */
   --radius: 1rem;
 }
 
@@ -24,6 +27,7 @@ body {
   font-family: var(--font-inter), Inter, system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 ::-webkit-scrollbar {
