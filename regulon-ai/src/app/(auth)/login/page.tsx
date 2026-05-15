@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Shield, Lock, Mail, Eye, EyeOff, ArrowRight, CheckCircle } from 'lucide-react';
+import { Lock, Mail, Eye, EyeOff, ArrowRight, CheckCircle } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,21 +20,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col">
-      {/* Top nav */}
-      <nav className="bg-white border-b border-zinc-100 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-7 h-7 bg-zinc-900 rounded-lg flex items-center justify-center">
-              <Shield className="w-3.5 h-3.5 text-emerald-400" strokeWidth={1.5} />
-            </div>
-            <span className="text-zinc-900 text-sm" style={{ fontWeight: 700 }}>Regulon AI</span>
-          </Link>
-          <Link href="/contact" className="text-xs text-zinc-500 hover:text-zinc-800 transition-colors">
-            Precisa de ajuda? → Fale com o suporte
-          </Link>
-        </div>
-      </nav>
-
       {/* Main content */}
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-[420px]">

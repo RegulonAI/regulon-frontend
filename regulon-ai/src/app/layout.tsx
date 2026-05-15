@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { AppHeader } from "@/components/layout/AppHeader";
-import { AppFooter } from "@/components/layout/AppFooter";
 import { RouteTransition } from "@/components/layout/RouteTransition";
 
 const inter = Inter({
@@ -23,12 +21,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className={`${inter.variable} h-full`}>
-      <body className="flex min-h-full flex-col bg-zinc-50 font-sans text-zinc-900 antialiased">
-        <AppHeader />
-        <main className="flex-1">
-          <RouteTransition>{children}</RouteTransition>
-        </main>
-        <AppFooter />
+      <body className="min-h-full bg-zinc-50 font-sans text-zinc-900 antialiased">
+        <RouteTransition>{children}</RouteTransition>
       </body>
     </html>
   );

@@ -1,8 +1,7 @@
  'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
-import { Shield, Mail, Phone, MapPin, Send, Building, User, MessageSquare, CheckCircle, ArrowLeft, Clock, Zap, Info } from 'lucide-react';
+import { Shield, Mail, Phone, MapPin, Send, Building, User, MessageSquare, CheckCircle, Clock, Zap, Info } from 'lucide-react';
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -19,27 +18,6 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-zinc-50">
-      {/* Nav - Mobile Optimized */}
-      <nav className="border-b border-zinc-100 bg-white/90 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-7 h-7 bg-zinc-900 rounded-lg flex items-center justify-center">
-              <Shield className="w-3.5 h-3.5 text-emerald-400" strokeWidth={1.5} />
-            </div>
-            <span className="text-zinc-900 text-sm" style={{ fontWeight: 700 }}>Regulon AI</span>
-          </Link>
-          <div className="flex items-center gap-3 md:gap-4">
-            <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-800 transition-colors">
-              <ArrowLeft className="w-3.5 h-3.5" strokeWidth={1.5} />
-              <span className="hidden sm:inline">Início</span>
-            </Link>
-            <Link href="/login" className="text-xs md:text-sm px-3 md:px-5 py-2 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 transition-all" style={{ fontWeight: 500 }}>
-              Entrar
-            </Link>
-          </div>
-        </div>
-      </nav>
-
       {/* Header */}
       <section className="bg-white border-b border-zinc-100 py-10 md:py-14">
         <div className="max-w-7xl mx-auto px-4 md:px-6">

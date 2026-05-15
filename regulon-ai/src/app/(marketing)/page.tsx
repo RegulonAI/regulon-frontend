@@ -6,32 +6,6 @@ import { Shield, Brain, TrendingDown, CheckCircle, ArrowRight, BarChart3, FileTe
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Sticky Nav - Mobile Optimized */}
-      <nav className="border-b border-zinc-100 bg-white/90 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 md:w-8 md:h-8 bg-zinc-900 rounded-lg flex items-center justify-center">
-              <Shield className="w-3.5 h-3.5 md:w-4.5 md:h-4.5 text-emerald-400" strokeWidth={1.5} />
-            </div>
-            <span className="text-zinc-900 tracking-tight text-base md:text-lg" style={{ fontWeight: 700 }}>Regulon AI</span>
-          </div>
-          <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-zinc-500 hover:text-zinc-900 transition-colors text-sm">Recursos</a>
-            <a href="#how-it-works" className="text-zinc-500 hover:text-zinc-900 transition-colors text-sm">Como Funciona</a>
-            <a href="#stats" className="text-zinc-500 hover:text-zinc-900 transition-colors text-sm">Resultados</a>
-            <Link href="/contact" className="text-zinc-500 hover:text-zinc-900 transition-colors text-sm">Contato</Link>
-          </div>
-          <div className="flex items-center gap-2 md:gap-3">
-            <Link href="/login" className="text-sm text-zinc-600 hover:text-zinc-900 transition-colors px-3 md:px-4 py-2">
-              Entrar
-            </Link>
-            <Link href="/contact" className="text-xs md:text-sm px-3 md:px-5 py-2 md:py-2.5 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 transition-all">
-              Demo
-            </Link>
-          </div>
-        </div>
-      </nav>
-
       {/* Announcement Bar */}
       <div className="bg-emerald-50 border-b border-emerald-100">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-2.5 flex items-center justify-center gap-2">
