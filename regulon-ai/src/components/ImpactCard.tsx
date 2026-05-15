@@ -1,6 +1,6 @@
 'use client';
 
-import type { ComponentType } from 'react';
+import type { ComponentProps, ComponentType } from 'react';
 import { AlertTriangle, ShieldAlert, ShieldCheck, ShieldMinus } from 'lucide-react';
 import type { RegulationImpact } from '@/types/compliance';
 import { cn } from '@/lib/utils';
@@ -33,8 +33,32 @@ const toneByLevel: Record<RegulationImpact['impactLevel'], string> = {
   LOW: 'border-l-zinc-300',
 };
 
+type BadgeVariant = NonNullable<ComponentProps<typeof Badge>['variant']>;
+
+const badgeStyleByLevel: Record<RegulationImpact['impactLevel'], { variant: BadgeVariant; className: string }> = {
+  CRITICAL: {
+    variant: 'destructive',
+    className: 'border-red-200 bg-red-50 text-red-700',
+  },
+  HIGH: {
+    variant: 'outline',
+    className: 'border-orange-200 bg-orange-50 text-orange-700',
+  },
+  MEDIUM: {
+    variant: 'outline',
+    className: 'border-yellow-200 bg-yellow-50 text-yellow-700',
+  },
+  LOW: {
+    variant: 'outline',
+    className: 'border-green-200 bg-green-50 text-green-700',
+  },
+};
+
 export function ImpactCard({ impact, className }: ImpactCardProps) {
   const LevelIcon = iconByLevel[impact.impactLevel];
+  const badgeStyle = badgeStyleByLevel[impact.impactLevel];
+  const regulationName = impact.source?.regulationName ?? 'Regulação não informada';
+  const jurisdiction = impact.source?.jurisdiction ?? impact.metadata?.jurisdiction ?? 'Jurisdição não informada';
 
   return (
     <Card className={cn('h-full border-l-4 bg-white', toneByLevel[impact.impactLevel], className)}>
@@ -44,10 +68,12 @@ export function ImpactCard({ impact, className }: ImpactCardProps) {
             <LevelIcon className="h-4 w-4 shrink-0 text-zinc-700" />
             <CardTitle className="text-sm leading-snug">{impact.title}</CardTitle>
           </div>
-          <Badge impactLevel={impact.impactLevel}>{impact.impactLevel}</Badge>
+          <Badge variant={badgeStyle.variant} className={badgeStyle.className}>
+            {impact.impactLevel}
+          </Badge>
         </div>
         <CardDescription className="text-xs text-zinc-500">
-          {impact.source.regulationName} • {impact.source.jurisdiction}
+          {regulationName} • {jurisdiction}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
