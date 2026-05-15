@@ -3,6 +3,7 @@
 import type { RegulationImpact } from '@/types/compliance';
 import { FileText, ArrowRight, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { SourceMetadata } from '@/components/SourceMetadata';
 
 interface DashboardProps {
   analysisActive: boolean;
@@ -11,13 +12,19 @@ interface DashboardProps {
 }
 
 const ImpactBadge = ({ level }: { level: RegulationImpact['impactLevel'] }) => {
-  return <Badge impactLevel={level}>{level}</Badge>;
+  const styles = {
+    CRITICAL: 'border-zinc-900 bg-zinc-900 text-zinc-50',
+    HIGH: 'border-zinc-700 bg-zinc-700 text-zinc-100',
+    MEDIUM: 'border-zinc-300 bg-zinc-200 text-zinc-800',
+    LOW: 'border-zinc-200 bg-zinc-100 text-zinc-600',
+  } as const;
+  return <Badge className={styles[level]}>{level}</Badge>;
 };
 
 export function Dashboard({ analysisActive, impacts, handleFileUpload }: DashboardProps) {
   if (!analysisActive) {
     return (
-      <div className="h-[60vh] flex flex-col items-center justify-center border-2 border-dashed border-zinc-200 rounded-2xl bg-zinc-50">
+      <div className="flex h-[60vh] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-200 bg-zinc-50">
         <div className="w-16 h-16 bg-white border border-zinc-200 rounded-2xl flex items-center justify-center mb-4 shadow-sm">
           <FileText className="w-8 h-8 text-zinc-400" />
         </div>
@@ -44,24 +51,25 @@ export function Dashboard({ analysisActive, impacts, handleFileUpload }: Dashboa
           <span className="text-[10px] text-zinc-500">Última atualização: Agora mesmo</span>
         </div>
 
-        <div className="grid grid-cols-1 gap-1 border border-zinc-200 rounded-lg overflow-hidden">
+        <div className="overflow-hidden rounded-lg border border-zinc-200">
           {/* Technical Data Grid Pattern */}
-          <div className="grid grid-cols-12 bg-zinc-50 p-3 text-[10px] uppercase font-bold text-zinc-500 border-b border-zinc-200">
-            <div className="col-span-5">Regulamentação / Norma</div>
-            <div className="col-span-2 text-center">Nível de Impacto</div>
-            <div className="col-span-5">Relevância no Negócio</div>
+          <div className="hidden bg-zinc-50 p-3 text-[10px] font-bold uppercase text-zinc-500 md:grid md:grid-cols-12 md:border-b md:border-zinc-200">
+            <div className="md:col-span-5">Regulamentação / Norma</div>
+            <div className="text-center md:col-span-2">Nível de Impacto</div>
+            <div className="md:col-span-5">Relevância no Negócio</div>
           </div>
 
           {impacts.map(impact => (
-            <div key={impact.id} className="grid grid-cols-12 p-4 items-center hover:bg-zinc-50 transition-colors group cursor-pointer border-b border-zinc-200 last:border-0">
-              <div className="col-span-5 flex flex-col gap-1">
+            <div key={impact.id} className="grid grid-cols-1 items-start gap-3 border-b border-zinc-200 p-4 transition-colors last:border-0 hover:bg-zinc-50 md:grid-cols-12 md:items-center">
+              <div className="flex flex-col gap-1 md:col-span-5">
                 <span className="font-bold text-sm">{impact.title}</span>
                 <span className="text-xs text-zinc-500">{impact.summary}</span>
+                {impact.metadata && <SourceMetadata compact metadata={impact.metadata} />}
               </div>
-              <div className="col-span-2 flex justify-center">
+              <div className="md:col-span-2 md:flex md:justify-center">
                 <ImpactBadge level={impact.impactLevel} />
               </div>
-              <div className="col-span-5 text-xs text-zinc-500 italic">
+              <div className="text-xs italic text-zinc-500 md:col-span-5">
                 {impact.relevance}
               </div>
             </div>
@@ -80,7 +88,7 @@ export function Dashboard({ analysisActive, impacts, handleFileUpload }: Dashboa
             ALERTA DE COMPLIANCE
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div className="p-4 bg-zinc-800/50 rounded-xl border border-zinc-700/50">
             <span className="text-[10px] text-zinc-500 uppercase block mb-1">Impacto Financeiro</span>
             <span className="text-lg font-bold">R$ 450k+ Estimado</span>

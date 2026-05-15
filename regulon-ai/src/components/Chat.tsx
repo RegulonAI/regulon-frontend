@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import type { ChatMessage } from '@/types/compliance';
 import { MessageSquare, ChevronRight } from 'lucide-react';
+import { SourceMetadata } from '@/components/SourceMetadata';
 
 interface ChatProps {
   messages: ChatMessage[];
@@ -100,6 +101,16 @@ export function Chat({ messages, setMessages }: ChatProps) {
                 : 'bg-zinc-100 text-zinc-900 rounded-tl-none border border-zinc-200'
               }`}>
               {msg.content}
+              {msg.role === 'assistant' && typeof msg.metadata?.confidenceScore === 'number' && (
+                <SourceMetadata
+                  compact
+                  metadata={{
+                    source: 'hybrid',
+                    confidenceScore: msg.metadata.confidenceScore,
+                    retrievedAt: msg.timestamp,
+                  }}
+                />
+              )}
             </div>
           </div>
         ))}

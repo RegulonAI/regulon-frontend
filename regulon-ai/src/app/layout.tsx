@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { RouteTransition } from "@/components/layout/RouteTransition";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -20,8 +21,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className={`${inter.variable} h-full`}>
-      <body className="h-full bg-zinc-50 font-sans text-zinc-900 antialiased">
-        {children}
+      <body className="min-h-full bg-zinc-50 font-sans text-zinc-900 antialiased">
+        <RouteTransition>{children}</RouteTransition>
       </body>
     </html>
   );
