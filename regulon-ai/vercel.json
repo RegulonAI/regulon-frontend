@@ -63,15 +63,5 @@
       "destination": "/dashboard",
       "permanent": false
     }
-  ],
-  "functions": {
-    "api/chat/route.ts": {
-      "maxDuration": 30,
-      "memory": 512
-    },
-    "api/analyze/route.ts": {
-      "maxDuration": 60,
-      "memory": 1024
-    }
-  }
+  ]
 }

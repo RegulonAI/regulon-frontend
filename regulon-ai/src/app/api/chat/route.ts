@@ -117,3 +117,7 @@ async function generateLegalInsight(
     agentsUsed
   };
 }
+
+// ✅ Native Next.js Route Segment Config (replaces vercel.json functions block)
+// Configures 30-second timeout for chat API endpoint on Vercel
+export const maxDuration = 30;
