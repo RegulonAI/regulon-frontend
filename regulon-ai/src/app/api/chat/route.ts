@@ -4,9 +4,11 @@ import type { ChatProcessingAgent } from '@/types/compliance';
 /**
  * POST /api/chat
  * Endpoint seguro para consultas jurídicas com IA
- * - API Key (GEMINI_API_KEY) permanece oculta no servidor
- * - Valida entrada e trata erros gracefully
- * - P2: Retorna metadata com confidence e agentsUsed
+ * 
+ * - Funciona com ou sem GEMINI_API_KEY configurada
+ * - Se GEMINI_API_KEY ausente: usa dados mock (MVP/Prototipagem)
+ * - Se GEMINI_API_KEY presente: será integrado com IA real em breve
+ * - Retorna sempre status 200 com metadata P2 (confidence, agentsUsed)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -19,19 +21,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // ✅ Lazy initialization: Check for API key only when needed
+    // If absent, fall back to mock data gracefully (no error, MVP mode active)
     const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey || apiKey === '') {
-      console.error('[CHAT_API] API key não configurada');
-      return NextResponse.json(
-        { 
-          error: 'Serviço de IA temporariamente indisponível. Por favor, configure GEMINI_API_KEY no servidor.' 
-        },
-        { status: 503 }
-      );
+    const isProductionMode = apiKey && apiKey.trim().length > 0;
+
+    if (isProductionMode) {
+      // Future: Initialize Gemini client and call real API
+      // const client = new GoogleGenerativeAI(apiKey);
+      // const result = await client.generateContent(message);
+      // return NextResponse.json(...);
+      
+      console.log('[CHAT_API] GEMINI_API_KEY configurada - modo integração real (futuro)');
+    } else {
+      console.warn('[CHAT_API] GEMINI_API_KEY não configurada - usando mock data (MVP)');
     }
 
-    // Simulando resposta de IA até backend estar pronto
-    // Future: Integrar com API real de IA quando disponível
+    // Gerar resposta: usa mock agora, será substituído por IA real
     const { reply, confidence, agentsUsed } = await generateLegalInsight(message);
 
     // P2: Retornar metadata de confiança
@@ -43,8 +49,8 @@ export async function POST(request: NextRequest) {
       }, 
       { status: 200 }
     );
-  } catch {
-    console.error('[CHAT_API] Request failed');
+  } catch (error) {
+    console.error('[CHAT_API] Request processing error:', error);
     return NextResponse.json(
       { error: 'Erro ao processar consulta jurídica. Tente novamente.' },
       { status: 500 }
@@ -54,12 +60,14 @@ export async function POST(request: NextRequest) {
 
 /**
  * Gera resposta simulada de assistente jurídico com metadata P2
- * Será substituído por integração real com backend LLM quando disponível
+ * 
+ * STATUS ATUAL: Mock data elegante para MVP
+ * FUTURO: Será substituído por integração real com Gemini/Claude + FastAPI do Samuel
  */
 async function generateLegalInsight(
   userMessage: string
 ): Promise<{ reply: string; confidence: number; agentsUsed: ChatProcessingAgent[] }> {
-  // Simular latência de rede
+  // Simular latência de processamento
   await new Promise(resolve => setTimeout(resolve, 800));
 
   const insights: Record<string, { reply: string; confidence: number }> = {
@@ -97,7 +105,7 @@ async function generateLegalInsight(
     'Consulta registrada. Para análise jurídica detalhada, o cérebro RAG do Samuel processará seu documento em breve. Você pode: 1) Fazer upload de um PDF, 2) Formular nova pergunta, 3) Consultar checklist.';
 
   // P2: Simular agentes que processaram a mensagem
-  const agentsUsed = [
+  const agentsUsed: ChatProcessingAgent[] = [
     { id: 'agent-1', name: 'classificador', displayName: 'Classificador' },
     { id: 'agent-2', name: 'matching', displayName: 'Matching' },
     { id: 'agent-3', name: 'interpretador', displayName: 'Interpretador' }
