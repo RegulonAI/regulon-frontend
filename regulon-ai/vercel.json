@@ -1,20 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "buildCommand": "pnpm run build",
-  "devCommand": "pnpm run dev",
-  "installCommand": "pnpm install --frozen-lockfile",
-  "env": {
-    "GEMINI_API_KEY": {
-      "description": "Chave de API do Google Gemini (obrigatória para /api/chat)",
-      "required": true
-    },
-    "BACKEND_API_URL": {
-      "description": "URL do backend FastAPI (futuro - não obrigatória para MVP)",
-      "required": false,
-      "example": "https://api.regulon.internal"
-    }
-  },
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install --frozen-lockfile",
   "headers": [
     {
       "source": "/api/(.*)",
@@ -74,15 +63,5 @@
       "destination": "/dashboard",
       "permanent": false
     }
-  ],
-  "functions": {
-    "api/chat/route.ts": {
-      "maxDuration": 30,
-      "memory": 512
-    },
-    "api/analyze/route.ts": {
-      "maxDuration": 60,
-      "memory": 1024
-    }
-  }
+  ]
 }

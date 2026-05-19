@@ -175,3 +175,7 @@ export async function POST(): Promise<NextResponse> {
     );
   }
 }
+
+// ✅ Native Next.js Route Segment Config (replaces vercel.json functions block)
+// Configures 60-second timeout for document analysis API endpoint on Vercel
+export const maxDuration = 60;
