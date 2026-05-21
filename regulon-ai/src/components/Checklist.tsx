@@ -2,6 +2,8 @@
 
 import type { ChecklistItem } from '@/types/compliance';
 import { CheckSquare } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { LegalTraceDetails } from '@/components/LegalTraceDetails';
 
 interface ChecklistProps {
   checklist: ChecklistItem[];
@@ -38,10 +40,36 @@ export function Checklist({ checklist, setChecklist }: ChecklistProps) {
                 }`}>
                 {item.completed && <CheckSquare className="w-3 h-3" />}
               </div>
-              <div className="flex-1">
-                <p className={`text-sm font-bold ${item.completed ? 'line-through text-zinc-400' : ''}`}>{item.task}</p>
-                <p className="text-xs text-zinc-500 mt-1">{item.description}</p>
-              </div>
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm font-bold break-words line-clamp-2 ${item.completed ? 'line-through text-zinc-400' : ''}`}>
+                    {item.task}
+                  </p>
+                  <p className="text-xs text-zinc-500 mt-1 break-words line-clamp-3">
+                    {item.description}
+                  </p>
+                  {item.legalTrace && (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button
+                          type="button"
+                          onClick={(event) => event.stopPropagation()}
+                          className="mt-2 inline-flex items-center text-[10px] text-zinc-500 hover:text-zinc-700 underline decoration-dotted"
+                        >
+                          Ver detalhes jurídicos
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl rounded-2xl">
+                        <DialogHeader>
+                          <DialogTitle>Rastreabilidade jurídica</DialogTitle>
+                          <DialogDescription>{item.task}</DialogDescription>
+                        </DialogHeader>
+                        <div className="max-h-[70vh] overflow-auto pr-1">
+                          <LegalTraceDetails trace={item.legalTrace} />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </div>
             </div>
           ))
         )}

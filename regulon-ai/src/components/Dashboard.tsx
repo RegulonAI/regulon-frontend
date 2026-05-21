@@ -1,9 +1,13 @@
 'use client';
 
-import type { RegulationImpact } from '@/types/compliance';
+import { useMemo, useState } from 'react';
+import type { ChecklistItem, RegulationImpact } from '@/types/compliance';
 import { FileText, ArrowRight, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { SourceMetadata } from '@/components/SourceMetadata';
+import { Checklist } from '@/components/Checklist';
+import { ImpactCard } from '@/components/ImpactCard';
+import { adaptFullExplanationResponse, backendFullExplanationResponse } from '@/lib/mocks/backendMock';
 
 interface DashboardProps {
   analysisActive: boolean;
@@ -22,6 +26,12 @@ const ImpactBadge = ({ level }: { level: RegulationImpact['impactLevel'] }) => {
 };
 
 export function Dashboard({ analysisActive, impacts, handleFileUpload }: DashboardProps) {
+  const stressTest = useMemo(
+    () => adaptFullExplanationResponse(backendFullExplanationResponse),
+    [],
+  );
+  const [stressChecklist, setStressChecklist] = useState<ChecklistItem[]>(stressTest.checklist);
+
   if (!analysisActive) {
     return (
       <div className="flex h-[60vh] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-200 bg-zinc-50">
@@ -74,6 +84,17 @@ export function Dashboard({ analysisActive, impacts, handleFileUpload }: Dashboa
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-400">Stress Test • FullExplanationResponse</h2>
+          <span className="text-[10px] text-zinc-500">Payload FastAPI</span>
+        </div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+          <ImpactCard impact={stressTest.impact} className="h-full" />
+          <Checklist checklist={stressChecklist} setChecklist={setStressChecklist} />
         </div>
       </section>
 
