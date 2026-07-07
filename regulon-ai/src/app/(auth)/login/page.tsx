@@ -76,9 +76,9 @@ export default function LoginPage() {
                   <label htmlFor="password" className="block text-xs text-zinc-700" style={{ fontWeight: 600 }}>
                     Senha
                   </label>
-                  <a href="#" className="text-xs text-emerald-600 hover:text-emerald-700 transition-colors" style={{ fontWeight: 500 }}>
+                  <Link href="/recovery" className="text-xs text-emerald-600 hover:text-emerald-700 transition-colors" style={{ fontWeight: 500 }}>
                     Esqueceu a senha?
-                  </a>
+                  </Link>
                 </div>
                 <div className="relative">
                   <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
