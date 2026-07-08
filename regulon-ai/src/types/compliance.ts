@@ -80,3 +80,46 @@ export interface AgentStatus {
   startTime?: number;
   endTime?: number;
 }
+
+export interface CanonicalExplanation {
+  action: string;
+  legal_basis: string;
+  source: string;
+  confidence: number;
+  reasoning: string;
+}
+
+export interface Chunk {
+  chunk_id: string;
+  chunk_text: string;
+  article: string;
+  primary_domain: string;
+  risk_level: string;
+  similarity_score: number;
+}
+
+export interface AgentStep {
+  agent: string;
+  status: 'success' | 'error' | 'skipped';
+  output: Record<string, unknown>;
+  execution_time_ms: number;
+}
+
+export interface FullExplanation {
+  canonical: CanonicalExplanation;
+  record_id?: string;
+  entity_type: string;
+  entity_id: string;
+  trace_id: string;
+  regulation_id: string;
+  company_id: string;
+  has_legal_basis: boolean;
+  is_valid: boolean;
+  validation_errors: string[];
+  chunks_used: Chunk[];
+  agent_trace: AgentStep[];
+  decision_factors: Record<string, number | object>;
+  generated_by: string;
+  created_at: string;
+}
+
