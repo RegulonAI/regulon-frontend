@@ -13,6 +13,7 @@ interface SidebarProps {
   setActiveTab: (tab: 'dashboard' | 'chat' | 'checklist') => void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const SidebarItem = ({ icon: Icon, label, active, onClick }: { icon: any, label: string, active?: boolean, onClick: () => void }) => (
   <button
     onClick={onClick}
