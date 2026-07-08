@@ -3,12 +3,12 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Mail, ArrowLeft, CheckCircle, AlertCircle, KeyRound } from "lucide-react";
+import { Mail, ArrowLeft, CheckCircle, KeyRound } from "lucide-react";
 
 export function RecoveryForm() {
   const [email, setEmail] = useState("");
   const [website, setWebsite] = useState(""); // Honeypot
-  const [turnstileToken, setTurnstileToken] = useState("mock-turnstile-token"); // Placeholder
+  const turnstileToken = "mock-turnstile-token"; // Placeholder
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -41,9 +41,10 @@ export function RecoveryForm() {
         description: "Se o e-mail estiver cadastrado, as instruções foram enviadas.",
         duration: 5000,
       });
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Erro interno ao processar requisição.";
       toast.error("Erro na solicitação", {
-        description: error.message || "Erro interno ao processar requisição.",
+        description: errorMessage,
         duration: 5000,
       });
     } finally {

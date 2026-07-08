@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import {
-  Shield, User, Building2, Zap, Bell, Save, Upload, X, Check,
+  Shield, User, Building2, Zap, Bell, Save, Upload, X,
   Mail, FileText, Globe, Database, Cloud, CheckCircle2, AlertCircle,
-  Loader2, ArrowLeft, Settings
+  Loader2, ArrowLeft
 } from 'lucide-react';
 
 type Tab = 'profile' | 'company' | 'integrations' | 'notifications';
