@@ -1268,9 +1268,9 @@ export default function DashboardPage() {
                         relevance: explanationData.canonical.legal_basis,
                         metadata: {
                           source: explanationData.entity_type === 'rag_response' ? 'vector_db' : 'postgresql',
-                          confidenceScore: explanationData.canonical.confidence,
+                          confidenceScore: Math.round(Math.max(0, Math.min(1, explanationData.canonical.confidence)) * 100),
                           documentId: explanationData.record_id,
-                        },
+                        }
                         source: {
                           jurisdiction: 'BR',
                           regulationName: explanationData.canonical.source,
