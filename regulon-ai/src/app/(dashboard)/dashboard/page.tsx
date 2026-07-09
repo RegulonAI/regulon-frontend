@@ -1263,7 +1263,13 @@ export default function DashboardPage() {
                       impact={{
                         id: explanationData.entity_id,
                         title: explanationData.canonical.action,
-                        impactLevel: (explanationData.decision_factors?.priority ? String(explanationData.decision_factors.priority).toUpperCase() : 'HIGH') as 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW',
+                        impactLevel: (() => {
+                          const raw = explanationData.decision_factors?.priority;
+                          const normalized = typeof raw === 'string' ? raw.toUpperCase() : '';
+                          return normalized === 'CRITICAL' || normalized === 'HIGH' || normalized === 'MEDIUM' || normalized === 'LOW'
+                            ? normalized
+                            : 'HIGH';
+                        })(),
                         summary: explanationData.canonical.reasoning,
                         relevance: explanationData.canonical.legal_basis,
                         metadata: {
