@@ -3,12 +3,12 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Mail, ArrowLeft, CheckCircle, AlertCircle, KeyRound } from "lucide-react";
+import { Mail, ArrowLeft, CheckCircle, KeyRound } from "lucide-react";
 
 export function RecoveryForm() {
   const [email, setEmail] = useState("");
   const [website, setWebsite] = useState(""); // Honeypot
-  const [turnstileToken, setTurnstileToken] = useState("mock-turnstile-token"); // Placeholder
+  const turnstileToken = "mock-turnstile-token"; // Placeholder
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 

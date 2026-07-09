@@ -69,7 +69,7 @@ export interface ExplainabilityFullExplanation {
   validation_errors: string[];
   chunks_used: ExplainabilityChunk[];
   agent_trace: ExplainabilityAgentStep[];
-  decision_factors: Record<string, number | object>;
+  decision_factors: Record<string, number | string | object>;
   generated_by: string;
   created_at: string;
 }

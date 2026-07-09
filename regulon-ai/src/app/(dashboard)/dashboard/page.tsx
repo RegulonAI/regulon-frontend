@@ -1293,7 +1293,7 @@ export default function DashboardPage() {
                       agents={
                         explanationData.agent_trace && explanationData.agent_trace.length > 0
                           ? explanationData.agent_trace.map((step) => {
-                              const stepIdentifier = (step.agent || (step as any).step || '').toLowerCase();
+                              const stepIdentifier = (step.agent || (step as unknown as { step?: string }).step || '').toLowerCase();
                               const nameMap: Record<string, 'classificador' | 'matching' | 'interpretador' | 'executor'> = {
                                 'classificador': 'classificador',
                                 'matching': 'matching',
