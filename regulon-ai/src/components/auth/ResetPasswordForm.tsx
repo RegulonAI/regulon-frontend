@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Lock, Eye, EyeOff, Check, ShieldCheck, ArrowRight } from "lucide-react";
+import { Lock, Eye, EyeOff, Check, X, ShieldCheck, ArrowRight } from "lucide-react";
 
 interface ResetPasswordFormProps {
   token: string;

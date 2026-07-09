@@ -5,7 +5,9 @@ import { AlertTriangle, ShieldAlert, ShieldCheck, ShieldMinus } from 'lucide-rea
 import type { RegulationImpact } from '@/types/compliance';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { LegalTraceDetails } from '@/components/LegalTraceDetails';
 
 interface ImpactCardProps {
   impact: RegulationImpact;
@@ -59,25 +61,26 @@ export function ImpactCard({ impact, className }: ImpactCardProps) {
   const badgeStyle = badgeStyleByLevel[impact.impactLevel];
   const regulationName = impact.source?.regulationName ?? 'Regulação não informada';
   const jurisdiction = impact.source?.jurisdiction ?? impact.metadata?.jurisdiction ?? 'Jurisdição não informada';
+  const legalTrace = impact.legalTrace;
 
   return (
-    <Card className={cn('h-full border-l-4 bg-white', toneByLevel[impact.impactLevel], className)}>
+    <Card className={cn('h-full border-l-4 rounded-2xl bg-white shadow-sm', toneByLevel[impact.impactLevel], className)}>
       <CardHeader className="space-y-3">
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 items-center gap-2">
             <LevelIcon className="h-4 w-4 shrink-0 text-zinc-700" />
-            <CardTitle className="text-sm leading-snug">{impact.title}</CardTitle>
+            <CardTitle className="text-sm leading-snug line-clamp-2 break-words">{impact.title}</CardTitle>
           </div>
           <Badge variant={badgeStyle.variant} className={badgeStyle.className}>
             {impact.impactLevel}
           </Badge>
         </div>
-        <CardDescription className="text-xs text-zinc-500">
+        <CardDescription className="text-xs text-zinc-500 line-clamp-1 break-words">
           {regulationName} • {jurisdiction}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        <p className="text-sm text-zinc-700">{impact.summary}</p>
+        <p className="text-sm text-zinc-700 line-clamp-3 break-words">{impact.summary}</p>
         <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3">
           <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
             Tradução de risco para negócio
@@ -87,6 +90,18 @@ export function ImpactCard({ impact, className }: ImpactCardProps) {
         <p className="text-xs text-zinc-500">
           <span className="font-medium text-zinc-700">Relevância:</span> {impact.relevance}
         </p>
+        {legalTrace && (
+          <Accordion type="single" collapsible className="rounded-2xl border border-zinc-200 bg-zinc-50/70">
+            <AccordionItem value="legal-trace" className="border-none">
+              <AccordionTrigger className="px-3 py-2 text-xs text-zinc-600">
+                Ver detalhes jurídicos
+              </AccordionTrigger>
+              <AccordionContent className="px-3 pb-3">
+                <LegalTraceDetails trace={legalTrace} />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        )}
       </CardContent>
     </Card>
   );

@@ -67,7 +67,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const { email, website } = body;
+    const { email, website, turnstileToken } = body;
 
     // 1. Validação do Honeypot (Campo de Anti-Bot oculto preenchido pelo bot)
     if (website && website.trim() !== "") {
