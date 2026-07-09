@@ -115,7 +115,7 @@ export interface AgentStatus {
   endTime?: number;
 }
 
-export interface CanonicalExplanation {
+export interface BackendCanonicalExplanation {
   action: string;
   legal_basis: string;
   source: string;
@@ -140,7 +140,7 @@ export interface AgentStep {
 }
 
 export interface FullExplanation {
-  canonical: CanonicalExplanation;
+  canonical: BackendCanonicalExplanation;
   record_id?: string;
   entity_type: string;
   entity_id: string;
@@ -156,4 +156,3 @@ export interface FullExplanation {
   generated_by: string;
   created_at: string;
 }
-
