@@ -150,7 +150,7 @@ export default function LandingPage() {
                       <span className="text-xs text-zinc-600" style={{ fontWeight: 600 }}>Copilot Regulatório</span>
                     </div>
                     <p className="text-xs text-zinc-500 bg-zinc-50 rounded-lg px-3 py-2 leading-relaxed">
-                      "A Res. CMN 4.966 requer revisão dos critérios de provisão até 15/05. Identifiquei 3 gaps nos seus processos atuais..."
+                      &quot;A Res. CMN 4.966 requer revisão dos critérios de provisão até 15/05. Identifiquei 3 gaps nos seus processos atuais...&quot;
                     </p>
                   </div>
                 </div>
@@ -291,7 +291,7 @@ export default function LandingPage() {
                   desc: 'Cada obrigação é convertida em tarefas concretas no checklist, atribuídas ao time responsável com prazo e evidência de conformidade.',
                   color: 'emerald',
                 },
-              ].map((step, idx) => (
+              ].map((step) => (
                 <div key={step.step}>
                   <div className="text-center">
                     <div className="relative inline-flex mb-6">

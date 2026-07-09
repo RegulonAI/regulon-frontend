@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Lock, Eye, EyeOff, Check, X, ShieldCheck, ArrowRight } from "lucide-react";
+import { Lock, Eye, EyeOff, Check, ShieldCheck, ArrowRight } from "lucide-react";
 
 interface ResetPasswordFormProps {
   token: string;
@@ -81,9 +81,10 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       setTimeout(() => {
         router.push("/login");
       }, 3000);
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Erro de conexão ao redefinir senha.";
       toast.error("Erro na redefinição", {
-        description: error.message || "Erro de conexão ao redefinir senha.",
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);

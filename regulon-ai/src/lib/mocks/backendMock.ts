@@ -93,7 +93,8 @@ export function adaptFullExplanationResponse(response: FullExplanationResponse):
 } {
   const canonical = {
     action: response.canonical.action,
-    legalBasis: response.canonical.legal_basis,
+    legal_basis: response.canonical.legal_basis, // <-- Mantém o formato exigido pelo tipo CanonicalExplanation
+    legalBasis: response.canonical.legal_basis,   // <-- Mantém para não quebrar as referências abaixo (impact/checklist)
     source: response.canonical.source,
     confidence: response.canonical.confidence,
     reasoning: response.canonical.reasoning,

@@ -6,13 +6,17 @@ import { useState, useRef, useEffect } from 'react';
 import {
   Shield, LayoutDashboard, Activity, MessageSquare, CheckSquare,
   BarChart3, Settings, Bell, Search, User, LogOut, Bot,
-  AlertCircle, AlertTriangle, CheckCircle2, TrendingUp, TrendingDown,
-  Clock, ExternalLink, Send, ChevronRight, Plus, Download,
-  RefreshCw, ArrowUpRight, FileText, Building2,
-  Eye, X, Check, Sparkles, Info, Menu, Share2, Database
+  AlertCircle, AlertTriangle, CheckCircle2,
+  Clock, Send, ChevronRight, Plus,
+  RefreshCw, Building2,
+  X, Check, Sparkles, Menu, Database
 } from 'lucide-react';
 import type { ChatMessage, DataSourceMetadata, ComplianceAction } from '@/types/compliance';
-import { SourceMetadata } from '@/components/SourceMetadata';
+import { ImpactCard } from '@/components/ImpactCard';
+import { AgentProgress } from '@/components/AgentProgress';
+import { explainAction, isApiError } from '@/lib/apiClient';
+import type { FullExplanation } from '@/types/types';
+
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type ImpactLevel = 'critical' | 'high' | 'medium' | 'low';
@@ -384,6 +388,7 @@ function OverviewView({
   messagesEndRef,
   checklistItems,
   toggleChecklist,
+  setSelectedActionId,
 }: {
   messages: ChatMessage[];
   inputValue: string;
@@ -393,6 +398,7 @@ function OverviewView({
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   checklistItems: ComplianceAction[];
   toggleChecklist: (id: number) => void;
+  setSelectedActionId: (id: string | null) => void;
 }) {
   return (
     <div className="space-y-6">
@@ -681,15 +687,31 @@ function OverviewView({
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 flex-1 sm:flex-initial">
-              <div className="w-full sm:w-24 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-emerald-400 rounded-full transition-all duration-500"
-                  style={{ width: `${(checklistItems.filter((i) => i.done).length / checklistItems.length) * 100}%` }}
-                ></div>
+              <input
+                type="text"
+                placeholder="Explicar ID (UUID)..."
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const val = (e.target as HTMLInputElement).value.trim();
+                    if (val) {
+                      setSelectedActionId(val);
+                      (e.target as HTMLInputElement).value = '';
+                    }
+                  }
+                }}
+                className="w-32 sm:w-40 px-2.5 py-1.5 bg-zinc-50 border border-zinc-200 rounded-lg text-xs text-zinc-800 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/30 focus:border-emerald-400 transition-all font-medium"
+              />
+              <div className="hidden xl:flex items-center gap-2">
+                <div className="w-full sm:w-24 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-emerald-400 rounded-full transition-all duration-500"
+                    style={{ width: `${(checklistItems.filter((i) => i.done).length / checklistItems.length) * 100}%` }}
+                  ></div>
+                </div>
+                <span className="text-xs text-zinc-500" style={{ fontWeight: 500 }}>
+                  {Math.round((checklistItems.filter((i) => i.done).length / checklistItems.length) * 100)}%
+                </span>
               </div>
-              <span className="text-xs text-zinc-500" style={{ fontWeight: 500 }}>
-                {Math.round((checklistItems.filter((i) => i.done).length / checklistItems.length) * 100)}%
-              </span>
             </div>
             <button
               className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-emerald-400 rounded-lg text-xs text-zinc-900 hover:bg-emerald-500 transition-all"
@@ -714,8 +736,11 @@ function OverviewView({
               >
                 {item.done && <Check className="w-2.5 h-2.5 text-zinc-900" strokeWidth={3} />}
               </button>
-              <div className="flex-1 min-w-0">
-                <p className={`text-xs ${item.done ? 'line-through text-zinc-400' : 'text-zinc-700'}`} style={{ fontWeight: 500 }}>
+              <div 
+                className="flex-1 min-w-0 cursor-pointer group"
+                onClick={() => setSelectedActionId(String(item.id))}
+              >
+                <p className={`text-xs group-hover:text-zinc-900 group-hover:underline transition-all ${item.done ? 'line-through text-zinc-400' : 'text-zinc-700'}`} style={{ fontWeight: 500 }}>
                   {item.text}
                 </p>
                 {item.financialImpact && !item.done && (
@@ -725,6 +750,13 @@ function OverviewView({
                 )}
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
+                <button
+                  onClick={() => setSelectedActionId(String(item.id))}
+                  className="flex items-center gap-1 px-2.5 py-1 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded-lg text-[10px] text-zinc-600 transition-all font-medium"
+                >
+                  <Sparkles className="w-3 h-3 text-emerald-600" />
+                  Explicar
+                </button>
                 <span className="hidden lg:inline-flex text-xs px-2 py-0.5 bg-zinc-100 text-zinc-500 rounded-md" style={{ fontWeight: 500 }}>
                   {item.framework}
                 </span>
@@ -755,8 +787,66 @@ function CopilotView() {
   return <div className="text-zinc-600 p-8">Copilot View (with metadata)</div>;
 }
 
-function ChecklistView({ items, toggleChecklist }: { items: ComplianceAction[]; toggleChecklist: (id: number) => void }) {
-  return <div className="text-zinc-600 p-8">Checklist View (with financial impact)</div>;
+function ChecklistView({ 
+  items, 
+  toggleChecklist,
+  setSelectedActionId,
+}: { 
+  items: ComplianceAction[]; 
+  toggleChecklist: (id: number) => void;
+  setSelectedActionId: (id: string | null) => void;
+}) {
+  return (
+    <div className="bg-white border border-zinc-200 rounded-2xl shadow-sm overflow-hidden max-w-4xl mx-auto">
+      <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
+        <div>
+          <h3 className="text-zinc-900 text-sm font-bold">Checklist Completo de Ações</h3>
+          <p className="text-xs text-zinc-400 mt-0.5">Gerencie o progresso e clique em &quot;Explicar&quot; para ver a base legal em tempo real.</p>
+        </div>
+      </div>
+      <div className="divide-y divide-zinc-50">
+        {items.map((item) => (
+          <div
+            key={item.id}
+            className={`flex items-center gap-4 px-6 py-4 hover:bg-zinc-50/60 transition-colors ${item.done ? 'opacity-60' : ''}`}
+          >
+            <button
+              onClick={() => toggleChecklist(item.id)}
+              className={`w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-all ${
+                item.done ? 'bg-emerald-400 border-emerald-400' : 'border-zinc-300 hover:border-emerald-400 bg-white'
+              }`}
+            >
+              {item.done && <Check className="w-3 h-3 text-zinc-900" strokeWidth={3} />}
+            </button>
+            <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setSelectedActionId(String(item.id))}>
+              <p className={`text-sm font-semibold text-zinc-800 ${item.done ? 'line-through text-zinc-400' : ''}`}>
+                {item.text}
+              </p>
+              <div className="flex gap-2 items-center mt-1">
+                <span className="text-[10px] px-1.5 py-0.5 bg-zinc-100 text-zinc-500 rounded font-medium">
+                  {item.category}
+                </span>
+                {item.financialImpact && !item.done && (
+                  <span className="text-[10px] text-orange-600 font-semibold">
+                    Impacto: {item.financialImpact}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSelectedActionId(String(item.id))}
+                className="flex items-center gap-1 px-2.5 py-1.5 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded-lg text-xs text-zinc-600 transition-all font-medium"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                Explicar
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function ReportsView() {
@@ -776,6 +866,45 @@ export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const aiReplyIndex = useRef(0);
+
+  // Live Explainability Integration states
+  const [selectedActionId, setSelectedActionId] = useState<string | null>(null);
+  const [explanationData, setExplanationData] = useState<FullExplanation | null>(null);
+  const [explanationError, setExplanationError] = useState<{ error: string; fallback: string } | null>(null);
+  const [explanationLoading, setExplanationLoading] = useState(false);
+
+  // Live Explainability API hook effect
+  useEffect(() => {
+    if (!selectedActionId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setExplanationData(null);
+      setExplanationError(null);
+      return;
+    }
+
+    const loadExplanation = async () => {
+      setExplanationLoading(true);
+      setExplanationError(null);
+      setExplanationData(null);
+      try {
+        const res = await explainAction(selectedActionId);
+        if (isApiError(res)) {
+          setExplanationError(res);
+        } else {
+          setExplanationData(res);
+        }
+      } catch {
+        setExplanationError({
+          error: 'Erro de conexão ou falha ao carregar explicabilidade do backend.',
+          fallback: 'Esta ação de conformidade foi mapeada a partir das cláusulas extraídas do documento legal.'
+        });
+      } finally {
+        setExplanationLoading(false);
+      }
+    };
+
+    loadExplanation();
+  }, [selectedActionId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -1034,11 +1163,18 @@ export default function DashboardPage() {
               messagesEndRef={messagesEndRef}
               checklistItems={checklistItems}
               toggleChecklist={toggleChecklist}
+              setSelectedActionId={setSelectedActionId}
             />
           )}
           {activeView === 'monitoring' && <MonitoringView />}
           {activeView === 'copilot' && <CopilotView />}
-          {activeView === 'checklist' && <ChecklistView items={checklistItems} toggleChecklist={toggleChecklist} />}
+          {activeView === 'checklist' && (
+            <ChecklistView 
+              items={checklistItems} 
+              toggleChecklist={toggleChecklist} 
+              setSelectedActionId={setSelectedActionId} 
+            />
+          )}
           {activeView === 'reports' && <ReportsView />}
         </main>
 
@@ -1054,6 +1190,197 @@ export default function DashboardPage() {
           </div>
         </footer>
       </div>
+
+      {/* Slide-over Explanation Detail Drawer */}
+      {selectedActionId && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          {/* Backdrop blur */}
+          <div 
+            className="absolute inset-0 bg-black/45 backdrop-blur-sm transition-opacity duration-300"
+            onClick={() => setSelectedActionId(null)}
+          />
+          
+          {/* Drawer Body Panel */}
+          <div className="relative w-full max-w-xl bg-white border-l border-zinc-200 h-full shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-300">
+            {/* Header */}
+            <div className="px-6 py-5 border-b border-zinc-200 flex items-center justify-between bg-zinc-50">
+              <div>
+                <h3 className="text-xs font-bold text-zinc-900 uppercase tracking-widest">Explicabilidade da Ação</h3>
+                <p className="text-[10px] text-zinc-400 mt-1 font-mono break-all">ID: {selectedActionId}</p>
+              </div>
+              <button 
+                onClick={() => setSelectedActionId(null)}
+                className="p-2 rounded-xl hover:bg-zinc-100 text-zinc-400 hover:text-zinc-600 transition-all border border-transparent hover:border-zinc-200"
+              >
+                <X className="w-4 h-4" strokeWidth={2} />
+              </button>
+            </div>
+
+            {/* Content Body */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {explanationLoading && (
+                <div className="space-y-6 animate-pulse">
+                  <div className="h-36 bg-zinc-100 rounded-2xl" />
+                  <div className="h-5 w-1/3 bg-zinc-100 rounded-md" />
+                  <div className="h-24 bg-zinc-100 rounded-2xl" />
+                  <div className="h-40 bg-zinc-100 rounded-2xl" />
+                </div>
+              )}
+
+              {explanationError && (
+                <div className="space-y-6">
+                  {/* Styled Error Alert */}
+                  <div className="p-4 bg-amber-50/80 border border-amber-200 rounded-2xl flex gap-3 shadow-sm">
+                    <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="text-xs font-bold text-amber-800 uppercase tracking-wider">Aviso de Conexão (FastAPI)</h4>
+                      <p className="text-xs text-amber-700 mt-1.5 leading-relaxed">{explanationError.error}</p>
+                    </div>
+                  </div>
+
+                  {/* Fallback Display */}
+                  <div className="p-5 border border-zinc-200 rounded-2xl bg-zinc-50/60 shadow-sm space-y-4">
+                    <div>
+                      <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Raciocínio de Fallback</h4>
+                      <p className="text-xs text-zinc-800 mt-2 leading-relaxed font-sans">{explanationError.fallback}</p>
+                    </div>
+                    
+                    <div className="pt-4 border-t border-zinc-200">
+                      <p className="text-[10px] text-zinc-400 leading-normal">
+                        Para ativar a explicabilidade em tempo real, certifique-se de que o backend FastAPI esteja rodando localmente na porta 8000. Você pode configurar a variável de ambiente <code className="bg-zinc-200 px-1 py-0.5 rounded font-mono text-[9px]">NEXT_PUBLIC_API_URL</code> no seu arquivo <code className="bg-zinc-200 px-1 py-0.5 rounded font-mono text-[9px]">.env.local</code>.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {explanationData && (
+                <div className="space-y-6">
+                  {/* Mapped ImpactCard */}
+                  <div>
+                    <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">Nível de Impacto Legal</h4>
+                    <ImpactCard 
+                      impact={{
+                        id: explanationData.entity_id,
+                        title: explanationData.canonical.action,
+                        impactLevel: (() => {
+                          const raw = explanationData.decision_factors?.priority;
+                          const normalized = typeof raw === 'string' ? raw.toUpperCase() : '';
+                          return normalized === 'CRITICAL' || normalized === 'HIGH' || normalized === 'MEDIUM' || normalized === 'LOW'
+                            ? normalized
+                            : 'HIGH';
+                        })(),
+                        summary: explanationData.canonical.reasoning,
+                        relevance: explanationData.canonical.legal_basis,
+                        metadata: {
+                          source: explanationData.entity_type === 'rag_response' ? 'vector_db' : 'postgresql',
+                          confidenceScore: Math.round(Math.max(0, Math.min(1, explanationData.canonical.confidence)) * 100),
+                          documentId: explanationData.record_id,
+                        },
+                        source: {
+                          jurisdiction: 'BR',
+                          regulationName: explanationData.canonical.source,
+                          effectiveDate: explanationData.created_at || '',
+                        }
+                      }} 
+                    />
+                  </div>
+
+                  {/* Mapped AgentProgress trace */}
+                  <div>
+                    <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">Rastreamento de Agentes</h4>
+                    <AgentProgress 
+                      agents={
+                        explanationData.agent_trace && explanationData.agent_trace.length > 0
+                          ? explanationData.agent_trace.map((step) => {
+                              const stepIdentifier = (step.agent || (step as unknown as { step?: string }).step || '').toLowerCase();
+                              const nameMap: Record<string, 'classificador' | 'matching' | 'interpretador' | 'executor'> = {
+                                'classificador': 'classificador',
+                                'matching': 'matching',
+                                'interpretador': 'interpretador',
+                                'executor': 'executor',
+                                'classifier': 'classificador',
+                                'classifier_agent': 'classificador',
+                                'matcher': 'matching',
+                                'matching_agent': 'matching',
+                                'interpreter': 'interpretador',
+                                'interpreter_agent': 'interpretador',
+                                'executor_agent': 'executor',
+                              };
+                              const displayMap: Record<string, string> = {
+                                'classificador': 'Classificador',
+                                'matching': 'Matching',
+                                'interpretador': 'Interpretador',
+                                'executor': 'Executor',
+                              };
+                              const mappedName = nameMap[stepIdentifier] || 'executor';
+                              
+                              let status: 'pendente' | 'processando' | 'concluído' | 'falhou' = 'concluído';
+                              if (step.status === 'error') status = 'falhou';
+                              if (step.status === 'skipped') status = 'pendente';
+
+                              return {
+                                id: stepIdentifier,
+                                name: mappedName,
+                                displayName: displayMap[mappedName] || stepIdentifier,
+                                status: status,
+                                progress: step.status === 'success' ? 100 : 0,
+                                message: step.execution_time_ms ? `Tempo: ${step.execution_time_ms}ms` : 'Concluído',
+                              };
+                            })
+                          : [
+                              { id: '1', name: 'classificador', displayName: 'Classificador', status: 'concluído', progress: 100 },
+                              { id: '2', name: 'matching', displayName: 'Matching', status: 'concluído', progress: 100 },
+                              { id: '3', name: 'interpretador', displayName: 'Interpretador', status: 'concluído', progress: 100 },
+                              { id: '4', name: 'executor', displayName: 'Executor', status: 'concluído', progress: 100 },
+                            ]
+                      }
+                    />
+                  </div>
+
+                  {/* Decision reasoning card */}
+                  <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-5 space-y-3 shadow-sm">
+                    <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Raciocínio & Decisão</h4>
+                    <p className="text-xs text-zinc-800 leading-relaxed whitespace-pre-line">
+                      {explanationData.canonical.reasoning}
+                    </p>
+                    <div className="pt-3 border-t border-zinc-200 flex flex-col gap-1">
+                      <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest">Base Legal Fundamentadora</span>
+                      <span className="text-xs text-emerald-800 font-bold leading-normal">{explanationData.canonical.legal_basis}</span>
+                    </div>
+                  </div>
+
+                  {/* Source Chunks (RAG) */}
+                  {explanationData.chunks_used && explanationData.chunks_used.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Trechos Normativos Recuperados (RAG)</h4>
+                      <div className="space-y-3">
+                        {explanationData.chunks_used.map((chunk, idx) => (
+                          <div key={chunk.chunk_id || idx} className="p-4 bg-zinc-50/50 border border-zinc-100 rounded-2xl space-y-2 hover:bg-zinc-50 transition-colors">
+                            <div className="flex items-center justify-between text-[9px]">
+                              <span className="font-bold text-zinc-400">Origem: {chunk.primary_domain || 'Geral'}</span>
+                              <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 font-bold border border-emerald-100 rounded">
+                                Similaridade: {typeof chunk.similarity_score === 'number' ? `${(chunk.similarity_score * 100).toFixed(0)}%` : 'N/A'}
+                              </span>
+                            </div>
+                            <p className="text-xs text-zinc-700 italic leading-relaxed">
+                              &quot;{chunk.chunk_text}&quot;
+                            </p>
+                            <div className="pt-2 border-t border-zinc-100 flex items-center justify-between text-[9px] text-zinc-400 font-mono">
+                              <span>Artigo: {chunk.article || 'N/A'}</span>
+                              <span>Risco: {chunk.risk_level || 'Médio'}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
