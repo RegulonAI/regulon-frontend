@@ -1276,7 +1276,7 @@ export default function DashboardPage() {
                           source: explanationData.entity_type === 'rag_response' ? 'vector_db' : 'postgresql',
                           confidenceScore: Math.round(Math.max(0, Math.min(1, explanationData.canonical.confidence)) * 100),
                           documentId: explanationData.record_id,
-                        }
+                        },
                         source: {
                           jurisdiction: 'BR',
                           regulationName: explanationData.canonical.source,
